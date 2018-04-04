@@ -9,8 +9,6 @@
    * @license     GNU General Public License v3.0
    * @param       String $file
    * @param       String $name
-   * @param       Array $hex
-   * @param       String $hexSting
    * @param       Array $dec
    * @param       Object $img
    * @param       Object $imgDecode
@@ -20,13 +18,11 @@
    class filePortrait{
       var $file;
       var $name;
-      var $hex;
-      var $hexString;
       var $dec;
       var $img;
       var $imgDecode;
       var $mime;
-      var $debug = false;
+      var $debug = true;
       public function __construct($file, $name = '', $mime = ''){
          $this->file = $file;
          $this->name = $name;
@@ -37,7 +33,7 @@
       * @access public
       * @param String $description
       * @param String $value
-      */ 
+      */
       public function addLog($description, $value){
          if($this->debug){
             header('Content-type: text/html; charset=UTF-8');
@@ -48,37 +44,36 @@
       * Altera o valor de $this->debug para exibir ou não o log do processamento
       * @access public
       * @param Boolean $status
-      */ 
+      */
       public function debugMode($status){
          $this->debug = $status;
       }
       /**
-      * Converte o arquivo especificado no método construtor em hexadecimal, salvando em $this->hexString
+      * Converte o arquivo especificado no método construtor em base decimal, salvando em $this->dec
       * @access public
-      */ 
-      public function getHex(){
+      */
+      public function getDec(){
          $handle = fopen($this->file, 'r') or die('Permission?');
-         while(!feof($handle)){
-            foreach(unpack('C*', fgets($handle)) as $dec){
-               $tmp = dechex($dec);
-               $this->hex[] .= strtoupper(str_repeat('0', 2 - strlen($tmp)).$tmp);
-            }
-         }
+         $data = fread($handle, filesize($this->file));
          fclose($handle);
-         $this->hexString = join($this->hex);
-         $this->addLog('Arquivo convertido em hexadecimal', $this->hexString);
+         $dec = unpack('C*', $data);
+         $lenDec = count($dec);
+         for($cont = 1; $cont <= $lenDec; $cont++){
+            $this->dec[] = $dec[$cont];
+         }
       }
       /**
-      * Converte um cadeia de caracteres hexadecimais em um aquivo cujo nome e mimetype são especificados nos parâmetros
+      * Converte um cadeia de caracteres decimais em um aquivo cujo nome e mimetype são especificados nos parâmetros
       * @access public
-      * @param String $hexCode
+      * @param String $dec
       * @param String $fileName
       * @param String $mimeType
-      */ 
-      public function writeHex($hexCode, $fileName, $mimeType){
+      */
+      public function writeDec(&$dec, $fileName, $mimeType){
          $tmp = null;
-         foreach(str_split($hexCode, 2) as $hex){
-            $tmp .= pack('C*', hexdec($hex));
+         $len = count($dec);
+         for($cont = 0; $cont < $len; $cont++){
+            $tmp .= pack('C*', $dec[$cont]);
          }
          if(!$this->debug){
             header('Content-Type: '.$mimeType);
@@ -87,25 +82,10 @@
          }
       }
       /**
-      * Converte o array $this->hexString de hexadecimal para decimal, salvando em $this->dec
-      * @access public
-      */ 
-      public function convertToDec(){
-         $this->dec = array();
-         $len = strlen($this->hexString);
-         if($len == 0){
-            $this->getHex();
-         }else{
-            foreach(str_split($this->hexString, 2) as $hex){
-               $this->dec[] = hexdec($hex);
-            }
-         }
-      }
-      /**
       * Gera um array com um valor rgb aleatório
       * @access public
       * @return Array
-      */ 
+      */
       public function randomRGB(){
          $rgb[] = rand(0, 255);
          $rgb[] = rand(0, 255);
@@ -113,39 +93,11 @@
          return $rgb;
       }
       /**
-      * Recebe uma string qualquer e converte para hexadecimal
-      * @access public
-      * @param String $string
-      * @return String
-      */ 
-      function strToHex($string){
-         $hex = '';
-         $len = strlen($string);
-         for($i = 0; $i < $len; $i++){
-            $hex .= dechex(ord($string[$i]));
-         }
-         return $hex;
-      }
-      /**
-      * Recebe uma string em hexadecimal e converte para ASCII
-      * @access public
-      * @param String $hex
-      * @return String
-      */ 
-      function hexToStr($hex){
-         $string = '';
-         $len = strlen($hex) - 1;
-         for($i = 0; $i < $len; $i+=2){
-            $string .= chr(hexdec($hex[$i].$hex[$i+1]));
-         }
-         return $string;
-      }
-      /**
       * Converte um array com valores decimais compreendidos entre 0 e 255 para uma string ASCII
       * @access public
       * @param Array $arr
       * @return String
-      */ 
+      */
       public function decToStr($arr){
          $str = '';
          $len = count($arr);
@@ -159,7 +111,7 @@
       * @access public
       * @param String $string
       * @return Array
-      */ 
+      */
       public function strToDec($string){
          $dec = null;
          $len = strlen($string);
@@ -174,23 +126,21 @@
       * @param Array $arr
       * @param Integer $min
       * @param Integer $max
-      */ 
+      */
       public function perfect(&$arr, $min, $max){
          $rest = (count($arr) % 3);
-         switch($rest){
-            case 1:
-               $arr[] = rand($min, $max);
-               $arr[] = rand($min, $max);
-               break;
-            case 2:
-               $arr[] = rand($min, $max);
-               break;
+         if($rest == 1){
+            $arr[] = rand($min, $max);
+            $arr[] = rand($min, $max);
+         }
+         if($rest == 2){
+            $arr[] = rand($min, $max);
          }
       }
       /**
       * Gera uma imagem PNG que conterá os dados do arquivo 'criptografados'. A imagem é escrita diretamente no navegador e deve ser salva com a extensão '.png'
       * @access public
-      */ 
+      */
       public function generateImage(){
          $this->perfect($this->dec, 0, 255);
          $sizeFile = filesize($this->file);
@@ -261,7 +211,7 @@
       /**
       * Descriptografa uma imagem gerada pelo método generateImage() e escreve os arquivo oculto diretamente na tela.
       * @access public
-      */ 
+      */
       public function decodeImage(){
          $count = 0;
          $end = false;
@@ -330,34 +280,22 @@
                $r = ($rgb >> 16) & 0xFF;
                $g = ($rgb >> 8) & 0xFF;
                $b = $rgb & 0xFF;
-               $r = strtoupper(dechex($r));
-               $g = strtoupper(dechex($g));
-               $b = strtoupper(dechex($b));
-               if(strlen($r) < 2){
-                  $r = '0'.$r;
-               }
-               if(strlen($g) < 2){
-                  $g = '0'.$g;
-               }
-               if(strlen($b) < 2){
-                  $b = '0'.$b;
-               }
                if($count < $info[1]){
-                  $this->hex[] = $r;
+                  $this->dec[] = $r;
                   $count++;
                }else{
                   $end = true;
                   break;
                }
                if($count < $info[1]){
-                  $this->hex[] = $g;
+                  $this->dec[] = $g;
                   $count++;
                }else{
                   $end = true;
                   break;
                }
                if($count < $info[1]){
-                  $this->hex[] = $b;
+                  $this->dec[] = $b;
                   $count++;
                }else{
                   $end = true;
@@ -365,9 +303,8 @@
                }
             }
          }
-         $this->writeHex(join($this->hex), $info[0], $info[2]);
+         $this->writeDec($this->dec, $info[0], $info[2]);
          $this->addLog('Operação concluída com sucesso', 'OK!');
-         $this->addLog('Informação hexadecimal do arquivo contido', join($this->hex));
       }
    }
 ?>

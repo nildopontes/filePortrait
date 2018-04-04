@@ -1,8 +1,14 @@
 <?php
    if(isset($_FILES['file'])){
+      list($usec, $sec) = explode(' ', microtime());
+      $script_start = (float) $sec + (float) $usec;
       include('class.filePortrait.php');
       $ex = new filePortrait($_FILES['file']['tmp_name']);
       $ex->decodeImage();
+      list($usec, $sec) = explode(' ', microtime());
+      $script_end = (float) $sec + (float) $usec;
+      $elapsed_time = round($script_end - $script_start, 5);
+      echo 'Tempo de Processamento: ', $elapsed_time, ' secs. Memória Usada: ', round(((memory_get_peak_usage(true) / 1024) / 1024), 2), 'Mb';
       exit;
    }
 ?>
