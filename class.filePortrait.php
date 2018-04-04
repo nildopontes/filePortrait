@@ -22,7 +22,7 @@
       var $img;
       var $imgDecode;
       var $mime;
-      var $debug = true;
+      var $debug = false;
       public function __construct($file, $name = '', $mime = ''){
          $this->file = $file;
          $this->name = $name;
