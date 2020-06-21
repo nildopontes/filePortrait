@@ -204,6 +204,7 @@
          }
          if(!$this->debug){
             header('Content-Type: image/png');
+            header('Content-Disposition: attachment; filename="'.$this->name.'.png"');
             imagepng($this->img);
             imagedestroy($this->img);
          }
