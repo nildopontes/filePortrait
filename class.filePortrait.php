@@ -216,6 +216,7 @@
       public function decodeImage(){
          $count = 0;
          $end = false;
+         $auxName = [];
          $this->imgDecode = imagecreatefrompng($this->file);
          for($y = 0; $y < imagesy($this->imgDecode); $y++){
             if($end){
@@ -227,19 +228,19 @@
                $g = ($rgb >> 8) & 0xFF;
                $b = $rgb & 0xFF;
                if($r != 0){
-                  $this->dec[] = $r;
+                  $auxName[] = $r;
                }else{
                   $end = true;
                   break;
                }
                if($g != 0){
-                  $this->dec[] = $g;
+                  $auxName[] = $g;
                }else{
                   $end = true;
                   break;
                }
                if($b != 0){
-                  $this->dec[] = $b;
+                  $auxName[] = $b;
                }else{
                   $end = true;
                   break;
@@ -249,7 +250,7 @@
                }
             }
          }
-         $info = explode('*', $this->decToStr($this->dec));
+         $info = explode('*', $this->decToStr($auxName));
          $info[1] = intval($info[1]);
          $this->addLog('Nome do arquivo contido, obtido no Cabeçalho', $info[0]);
          $this->addLog('Mimetype do arquivo contido, obtido no Cabeçalho', $info[2]);
