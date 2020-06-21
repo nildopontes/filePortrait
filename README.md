@@ -20,6 +20,7 @@ Como arquivo original usei a imagem JPG abaixo, mas poderia ser um arquivo de qu
 O resultado obtido ao codificar a imagem acima seria isto:
 
 ![](tests/sunflower.jpg.png)
+
 #Funcionamento
 
 Como sabemos um arquivo é basicamente um amontoado de bytes. Um byte pode assumir 256 valores distintos. Uma imagem é basicamente um amontoado de pixels. Um pixel representa 1 ponto da imagem e possui uma cor. No padrão RGB uma cor é formada por uma mistura de três cores 'primárias' (Red, Green e Blue) em determinadas intensidades. Cada uma dessas três cores podem assumir 256 valores distintos, já que elas ocupam 1 byte.
