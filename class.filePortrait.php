@@ -218,11 +218,13 @@
          $end = false;
          $auxName = [];
          $this->imgDecode = imagecreatefrompng($this->file);
-         for($y = 0; $y < imagesy($this->imgDecode); $y++){
+         $h = imagesy($this->imgDecode);
+         for($y = 0; $y < $h; $y++){
             if($end){
                break;
             }
-            for($x = 0; $x < imagesx($this->imgDecode); $x++){
+            $w = imagesx($this->imgDecode);
+            for($x = 0; $x < $w; $x++){
                $rgb = imagecolorat($this->imgDecode, $x, $y);
                $r = ($rgb >> 16) & 0xFF;
                $g = ($rgb >> 8) & 0xFF;
@@ -258,17 +260,16 @@
          $count = 0;
          $end = false;
          //----- Posiciona o cursor para depois do Cabeçalho da imagem
-         $side = imagesy($this->imgDecode);
-         if($side > 60){
+         if($h > 60){
             $xInitPosition = 60;
             $yInitPosition = 0;
          }else{
-            if($side == 60){
+            if($h == 60){
                $xInitPosition = 0;
                $yInitPosition = 1;
             }else{
-               $xInitPosition = (60 % $side);
-               $yInitPosition = ((60 - $xInitPosition) / $side);
+               $xInitPosition = (60 % $h);
+               $yInitPosition = ((60 - $xInitPosition) / $h);
             }
          }
          //-----------
